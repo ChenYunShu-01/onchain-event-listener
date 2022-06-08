@@ -31,35 +31,6 @@ type Result struct {
 	Code string `json:"code"`
 }
 
-func Mint(m *types.L2MintData) (*types.MintResponse, error) {
-	m.Type = "MintRequest"
-	tx_id := GetTransactionID()
-	t := Transaction{TX: m, TransactionID: tx_id}
-	body, _ := json.Marshal(t)
-	err := request(ADD_TRANSACTION_URL, body)
-	if err != nil {
-		return nil, err
-	}
-	return &types.MintResponse{
-		TransactionID: tx_id,
-	}, nil
-}
-
-func Transfer(r *types.L2TransferRequest) (*types.TransferResponse, error) {
-	r.Type = "TransferRequest"
-	tx_id := GetTransactionID()
-	t := Transaction{TX: r, TransactionID: tx_id}
-	body, _ := json.Marshal(t)
-	err := request(ADD_TRANSACTION_URL, body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &types.TransferResponse{
-		TransactionID: tx_id,
-	}, nil
-}
-
 func Deposit(r *types.L2DepositRequest) (int64, error) {
 	r.Type = "DepositRequest"
 	tx_id := GetTransactionID()
@@ -67,21 +38,6 @@ func Deposit(r *types.L2DepositRequest) (int64, error) {
 	body, _ := json.Marshal(t)
 	err := request(ADD_TRANSACTION_URL, body)
 	return tx_id, err
-}
-
-func Withdraw(r *types.L2WithdrawRequest) (*types.WithdrawResponse, error) {
-	r.Type = "WithdrawalRequest"
-	tx_id := GetTransactionID()
-	t := Transaction{TX: r, TransactionID: tx_id}
-	body, _ := json.Marshal(t)
-	err := request(ADD_TRANSACTION_URL, body)
-	if err != nil {
-		return nil, err
-	}
-
-	return &types.WithdrawResponse{
-		TransactionID: tx_id,
-	}, nil
 }
 
 func GetTransactionID() int64 {

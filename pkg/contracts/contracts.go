@@ -5,28 +5,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	rdb "github.com/reddio-com/red-adapter/pkg/db"
-	"github.com/reddio-com/red-adapter/types"
 	"github.com/reddio-com/starkex-contracts-source/source/deposits"
 )
-
-// ContractType checks contract type
-func GetContractType(db *rdb.DB, contractAddress string) types.TokenType {
-	info, _ := db.GetContractInfo(contractAddress)
-	return info.Type
-}
-
-// IsERC20 check is contract is ERC20
-func IsERC20(db *rdb.DB, contractAddress string) bool {
-	typ := GetContractType(db, contractAddress)
-	return typ == types.ERC20
-}
-
-// IsERC721 check is contract is ERC721
-func IsERC721(db *rdb.DB, contractAddress string) bool {
-	typ := GetContractType(db, contractAddress)
-	return typ == types.ERC721
-}
 
 type ContractName = string
 
