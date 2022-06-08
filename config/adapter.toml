@@ -1,0 +1,6 @@
+chain = "goerli"
+event_block_gap = 15
+[chains]
+    [chains.goerli]
+    rpc = "https://goerli.infura.io/v3/b9cfbac7f7a24c85b0d32abd12c28e06"
+    chainID = 5
