@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+
+  red-adapter:
+    image: ghcr.io/reddio-com/red-adapter:latest
+    restart: always
+    environment:
+      - DSN=xnft:password@tcp(xnft-dev-staging.ckczudwbqdp2.ap-northeast-1.rds.amazonaws.com:3306)/reddifi?charset=utf8mb4&parseTime=True&loc=Local
