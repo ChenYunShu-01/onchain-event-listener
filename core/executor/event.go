@@ -92,7 +92,8 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 	currentBlockNumber := latestEvent.BlockNumber
 
 	logTicker := time.Tick(3 * time.Second)
-	infoTicker := time.Tick(time.Minute)
+	infoTicker := time.Tick(1 * time.Minute)
+
 	for {
 		select {
 		case <-logTicker:
@@ -136,7 +137,7 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 			}
 			parsedBlock = endBlockNumber
 		case <-infoTicker:
-			fmt.Println("currentBlockNumber:", currentBlockNumber, "parsed block", parsedBlock)
+			fmt.Println("eventName:", eventName, "currentBlockNumber:", currentBlockNumber, "parsed block", parsedBlock)
 		}
 	}
 }
