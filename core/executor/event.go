@@ -89,16 +89,19 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 		latestEvent.BlockNumber = ProjectStartBlock
 	}
 	parsedBlock := latestEvent.BlockNumber
+	currentBlockNumber := latestEvent.BlockNumber
 
 	logTicker := time.Tick(3 * time.Second)
+	infoTicker := time.Tick(time.Minute)
 	for {
 		select {
 		case <-logTicker:
-			currentBlockNumber, err := client.BlockNumber(context.Background())
+			currentBlockNumber, err = client.BlockNumber(context.Background())
 			if err != nil {
-				return err
+				log.Println(err)
+				continue
 			}
-			fmt.Println("currentBlockNumber:", currentBlockNumber, "parsed block", parsedBlock, "eventBlockGap:", eventBlockGap)
+
 			if currentBlockNumber-parsedBlock < eventBlockGap {
 				continue
 			}
@@ -123,7 +126,6 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 				if currenEventLog.NewerThan(latestEvent) {
 					db.Create(&currenEventLog)
 					l2DepositRequest := computeL2DepositRequest(log)
-					//fmt.Println(l2DepositRequest)
 					txid, err := starkex.Deposit(l2DepositRequest)
 					if err != nil {
 						return err
@@ -133,6 +135,8 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 				}
 			}
 			parsedBlock = endBlockNumber
+		case <-infoTicker:
+			fmt.Println("currentBlockNumber:", currentBlockNumber, "parsed block", parsedBlock)
 		}
 	}
 }
