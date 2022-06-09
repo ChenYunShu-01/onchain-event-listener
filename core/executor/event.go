@@ -92,7 +92,7 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 	currentBlockNumber := latestEvent.BlockNumber
 
 	logTicker := time.Tick(3 * time.Second)
-	infoTicker := time.Tick(1 * time.Minute)
+	infoTicker := time.Tick(3 * time.Minute)
 
 	for {
 		select {
