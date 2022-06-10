@@ -108,7 +108,7 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 		case <-logTicker:
 			currentBlockNumber, err = client.BlockNumber(context.Background())
 			if err != nil {
-				logger.Info(err.Error())
+				logger.Info("got error", "details:", err.Error())
 				continue
 			}
 
@@ -125,7 +125,7 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 			}
 			logs, err := client.FilterLogs(context.Background(), filterQuery)
 			if err != nil {
-				logger.Info(err.Error())
+				logger.Info("got error", "details:", err.Error())
 				continue
 			}
 			for _, log := range logs {
