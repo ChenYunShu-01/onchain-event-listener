@@ -156,7 +156,7 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 			}
 			parsedBlock = endBlockNumber
 		case <-infoTicker:
-			logger.Info("eventName:", eventName, "currentBlockNumber:", currentBlockNumber, "parsed block", parsedBlock)
+			logger.Info("eventName:", eventName, "currentBlockNumber:", fmt.Sprint(currentBlockNumber), "parsed block", fmt.Sprint(parsedBlock))
 		}
 	}
 }
