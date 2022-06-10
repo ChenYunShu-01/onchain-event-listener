@@ -15,8 +15,9 @@ func NewDB(db *gorm.DB) *DB {
 	}
 }
 
-func (db *DB) InitL1AdapterTable() {
-	db.AutoMigrate(&types.EventLog{})
+func (db *DB) InitL1AdapterTable() error {
+	err := db.AutoMigrate(&types.EventLog{})
+	return err
 }
 
 func (db *DB) GetLastEvent(eventName types.EventName) *types.EventLog {
