@@ -129,7 +129,6 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 				}
 				if currenEventLog.NewerThan(latestEvent) {
 					fmt.Println("event Name", eventName)
-					fmt.Println("event Log", currenEventLog)
 					db.Create(&currenEventLog)
 					l2DepositRequest, err := computeL2DepositRequest(log, eventName)
 					if err != nil {
