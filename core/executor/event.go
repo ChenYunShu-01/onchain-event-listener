@@ -131,12 +131,14 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 					if err != nil {
 						return err
 					}
-					txid, err := starkex.Deposit(l2DepositRequest)
-					if err != nil {
-						return err
+					if log.Address == common.HexToAddress("0xe84c71a35e48958567935c79a41c52d20659e3d1") || log.Address == common.HexToAddress("0xe84C71A35e48958567935C79A41c52D20659e3d1") {
+						txid, err := starkex.Deposit(l2DepositRequest)
+						if err != nil {
+							return err
+						}
+						fmt.Println("txid:", txid)
+						latestEvent = currenEventLog
 					}
-					fmt.Println("txid:", txid)
-					latestEvent = currenEventLog
 				}
 			}
 			parsedBlock = endBlockNumber
