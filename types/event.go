@@ -21,10 +21,7 @@ type EventLog struct {
 }
 
 func (event *EventLog) IsNil() bool {
-	if event.EventName == "" {
-		return true
-	}
-	return false
+	return event.EventName == ""
 }
 
 func (event *EventLog) NewerThan(log *EventLog) bool {

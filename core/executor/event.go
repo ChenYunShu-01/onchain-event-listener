@@ -42,9 +42,9 @@ func NewExecutor(cfg *config.Cfg) (*Executor, error) {
 		cfg: cfg,
 	}
 
-	executor.db.InitL1AdapterTable()
+	err = executor.db.InitL1AdapterTable()
 
-	return executor, nil
+	return executor, err
 }
 
 func (e *Executor) StartToWatchEvent() {
@@ -126,7 +126,10 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 				}
 				if currenEventLog.NewerThan(latestEvent) {
 					db.Create(&currenEventLog)
-					l2DepositRequest := computeL2DepositRequest(log)
+					l2DepositRequest, err := computeL2DepositRequest(log)
+					if err != nil {
+						return err
+					}
 					txid, err := starkex.Deposit(l2DepositRequest)
 					if err != nil {
 						return err
@@ -142,15 +145,18 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 	}
 }
 
-func computeL2DepositRequest(log ethtypes.Log) *types.L2DepositRequest {
+func computeL2DepositRequest(log ethtypes.Log) (*types.L2DepositRequest, error) {
 	l2DepositRequest := &types.L2DepositRequest{}
 	depositLog := &types.DepositLog{}
 	contract := contracts.GetContractMeta(contracts.Deposit)
-	contract.ToBoundContract().UnpackLog(depositLog, types.LogDeposit, log)
+	err := contract.ToBoundContract().UnpackLog(depositLog, types.LogDeposit, log)
+	if err != nil {
+		return l2DepositRequest, err
+	}
 	l2DepositRequest.StarkKey = fmt.Sprint("0x", depositLog.StarkKey.Text(16))
 	l2DepositRequest.VaultId = depositLog.VaultId
 	l2DepositRequest.Amount = depositLog.QuantizedAmount.String()
 	l2DepositRequest.TokenId = fmt.Sprint("0x", depositLog.AssetType.Text(16))
 
-	return l2DepositRequest
+	return l2DepositRequest, nil
 }
