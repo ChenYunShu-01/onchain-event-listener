@@ -54,6 +54,7 @@ func NewExecutor(cfg *config.Cfg) (*Executor, error) {
 
 	err = executor.db.InitL1AdapterTable()
 
+	
 	return executor, err
 }
 
