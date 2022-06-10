@@ -125,8 +125,9 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 					return err
 				}
 				if currenEventLog.NewerThan(latestEvent) {
+					fmt.Println("event Name", eventName)
 					db.Create(&currenEventLog)
-					l2DepositRequest, err := computeL2DepositRequest(log)
+					l2DepositRequest, err := computeL2DepositRequest(log, eventName)
 					if err != nil {
 						return err
 					}
@@ -145,11 +146,16 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 	}
 }
 
-func computeL2DepositRequest(log ethtypes.Log) (*types.L2DepositRequest, error) {
+func computeL2DepositRequest(log ethtypes.Log, eventName types.EventName) (*types.L2DepositRequest, error) {
 	l2DepositRequest := &types.L2DepositRequest{}
 	depositLog := &types.DepositLog{}
 	contract := contracts.GetContractMeta(contracts.Deposit)
-	err := contract.ToBoundContract().UnpackLog(depositLog, types.LogDeposit, log)
+	var err error
+	if eventName == types.LogDeposit {
+		err = contract.ToBoundContract().UnpackLog(depositLog, types.LogDeposit, log)
+	} else if eventName == types.LogNftDeposit {
+		err = contract.ToBoundContract().UnpackLog(depositLog, types.LogNftDeposit, log)
+	}
 	if err != nil {
 		return l2DepositRequest, err
 	}
