@@ -13,6 +13,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/reddio-com/red-adapter/config"
 	"github.com/reddio-com/red-adapter/pkg/starkex"
+	"github.com/reddio-com/starkex-contracts-source/source/deposits"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
@@ -21,6 +22,8 @@ import (
 	rdb "github.com/reddio-com/red-adapter/pkg/db"
 	event2 "github.com/reddio-com/red-adapter/pkg/event"
 	"github.com/reddio-com/red-adapter/types"
+	"github.com/reddio-com/starkex-utils/asset"
+	starkex_types "github.com/reddio-com/starkex-utils/types"
 )
 
 const (
@@ -126,19 +129,22 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 				}
 				if currenEventLog.NewerThan(latestEvent) {
 					fmt.Println("event Name", eventName)
+					fmt.Println("event Log", currenEventLog)
 					db.Create(&currenEventLog)
 					l2DepositRequest, err := computeL2DepositRequest(log, eventName)
 					if err != nil {
 						return err
 					}
-					if log.Address == common.HexToAddress("0xe84c71a35e48958567935c79a41c52d20659e3d1") || log.Address == common.HexToAddress("0xe84C71A35e48958567935C79A41c52D20659e3d1") {
-						txid, err := starkex.Deposit(l2DepositRequest)
-						if err != nil {
-							return err
-						}
-						fmt.Println("txid:", txid)
-						latestEvent = currenEventLog
+					if l2DepositRequest.StarkKey != "0x38cae143fe6d2b8bdb7051f211744017d98f7e6a67e45a5dfc08759c119cf3c" {
+						continue
 					}
+
+					txid, err := starkex.Deposit(l2DepositRequest)
+					if err != nil {
+						return err
+					}
+					fmt.Println("txid:", txid)
+					latestEvent = currenEventLog
 				}
 			}
 			parsedBlock = endBlockNumber
@@ -150,21 +156,29 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 
 func computeL2DepositRequest(log ethtypes.Log, eventName types.EventName) (*types.L2DepositRequest, error) {
 	l2DepositRequest := &types.L2DepositRequest{}
-	depositLog := &types.DepositLog{}
+	depositLog := &deposits.DepositsLogDeposit{}
+	depositNFTLog := &deposits.DepositsLogNftDeposit{}
 	contract := contracts.GetContractMeta(contracts.Deposit)
 	var err error
 	if eventName == types.LogDeposit {
 		err = contract.ToBoundContract().UnpackLog(depositLog, types.LogDeposit, log)
+		if err != nil {
+			return l2DepositRequest, err
+		}
+		l2DepositRequest.StarkKey = fmt.Sprint("0x", depositLog.StarkKey.Text(16))
+		l2DepositRequest.VaultId = depositLog.VaultId
+		l2DepositRequest.Amount = depositLog.QuantizedAmount.String()
+		l2DepositRequest.TokenId = fmt.Sprint("0x", depositLog.AssetType.Text(16))
 	} else if eventName == types.LogNftDeposit {
-		err = contract.ToBoundContract().UnpackLog(depositLog, types.LogNftDeposit, log)
+		err = contract.ToBoundContract().UnpackLog(depositNFTLog, types.LogNftDeposit, log)
+		if err != nil {
+			return l2DepositRequest, err
+		}
+		l2DepositRequest.StarkKey = fmt.Sprint("0x", depositNFTLog.StarkKey.Text(16))
+		l2DepositRequest.VaultId = depositNFTLog.VaultId
+		l2DepositRequest.Amount = "1"
+		l2DepositRequest.TokenId = fmt.Sprint("0x", asset.GetAssetIDByAssetType(starkex_types.ERC721, depositNFTLog.AssetType, depositNFTLog.TokenId).Text(16))
 	}
-	if err != nil {
-		return l2DepositRequest, err
-	}
-	l2DepositRequest.StarkKey = fmt.Sprint("0x", depositLog.StarkKey.Text(16))
-	l2DepositRequest.VaultId = depositLog.VaultId
-	l2DepositRequest.Amount = depositLog.QuantizedAmount.String()
-	l2DepositRequest.TokenId = fmt.Sprint("0x", depositLog.AssetType.Text(16))
 
 	return l2DepositRequest, nil
 }
