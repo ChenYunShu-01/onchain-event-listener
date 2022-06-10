@@ -53,20 +53,20 @@ func (e *Executor) StartToWatchEvent() {
 	go func() {
 		err := watchEvent(contracts.Deposit, types.LogDeposit, e.db, client, eventBlockGap)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("%+v\n", err)
 
 		}
 	}()
 	go func() {
 		err := watchEvent(contracts.Deposit, types.LogNftDeposit, e.db, client, eventBlockGap)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("%+v\n", err)
 		}
 	}()
 	go func() {
 		err := watchEvent(contracts.Deposit, types.LogDepositWithTokenId, e.db, client, eventBlockGap)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("%+v\n", err)
 		}
 	}()
 	<-make(chan struct{})

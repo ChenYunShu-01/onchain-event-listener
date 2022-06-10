@@ -33,8 +33,4 @@ func main() {
 	}
 
 	s.StartToWatchEvent()
-
-	if err != nil {
-		panic(err)
-	}
 }
