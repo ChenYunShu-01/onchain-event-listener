@@ -33,7 +33,8 @@ const (
 
 var (
 	zapLogger, _ = zap.NewDevelopment()
-	logger       = zapr.NewLogger(zapLogger)
+	loger        = zapr.NewLogger(zapLogger)
+	logger       = loger.WithValues("package", "executor")
 )
 
 type Executor struct {
@@ -149,7 +150,7 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 						logger.Error(err, "deposit failed")
 						return err
 					}
-					logger.Info("send to starkex txid:", txid)
+					logger.Info("send to starkex", "txid:", fmt.Sprint(txid))
 					latestEvent = currenEventLog
 				}
 			}
