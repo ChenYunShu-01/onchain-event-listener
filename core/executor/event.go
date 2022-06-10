@@ -3,7 +3,6 @@ package executor
 import (
 	"context"
 	"fmt"
-	"log"
 	"math/big"
 	"time"
 
@@ -18,16 +17,23 @@ import (
 	"gorm.io/gorm"
 
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/go-logr/zapr"
 	"github.com/reddio-com/red-adapter/pkg/contracts"
 	rdb "github.com/reddio-com/red-adapter/pkg/db"
 	event2 "github.com/reddio-com/red-adapter/pkg/event"
 	"github.com/reddio-com/red-adapter/types"
 	"github.com/reddio-com/starkex-utils/asset"
 	starkex_types "github.com/reddio-com/starkex-utils/types"
+	"go.uber.org/zap"
 )
 
 const (
 	ProjectStartBlock = uint64(7019341)
+)
+
+var (
+	zapLogger, _ = zap.NewDevelopment()
+	logger       = zapr.NewLogger(zapLogger)
 )
 
 type Executor struct {
@@ -56,20 +62,19 @@ func (e *Executor) StartToWatchEvent() {
 	go func() {
 		err := watchEvent(contracts.Deposit, types.LogDeposit, e.db, client, eventBlockGap)
 		if err != nil {
-			fmt.Printf("%+v\n", err)
-
+			logger.Error(err, "watch event failed")
 		}
 	}()
 	go func() {
 		err := watchEvent(contracts.Deposit, types.LogNftDeposit, e.db, client, eventBlockGap)
 		if err != nil {
-			fmt.Printf("%+v\n", err)
+			logger.Error(err, "watch event failed")
 		}
 	}()
 	go func() {
 		err := watchEvent(contracts.Deposit, types.LogDepositWithTokenId, e.db, client, eventBlockGap)
 		if err != nil {
-			fmt.Printf("%+v\n", err)
+			logger.Error(err, "watch event failed")
 		}
 	}()
 	<-make(chan struct{})
@@ -102,7 +107,7 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 		case <-logTicker:
 			currentBlockNumber, err = client.BlockNumber(context.Background())
 			if err != nil {
-				log.Println(err)
+				logger.Info(err.Error())
 				continue
 			}
 
@@ -119,7 +124,7 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 			}
 			logs, err := client.FilterLogs(context.Background(), filterQuery)
 			if err != nil {
-				log.Println(err)
+				logger.Info(err.Error())
 				continue
 			}
 			for _, log := range logs {
@@ -132,6 +137,7 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 					db.Create(&currenEventLog)
 					l2DepositRequest, err := computeL2DepositRequest(log, eventName)
 					if err != nil {
+						logger.Error(err, "compute l2 deposit request failed")
 						return err
 					}
 					if l2DepositRequest.StarkKey != "0x38cae143fe6d2b8bdb7051f211744017d98f7e6a67e45a5dfc08759c119cf3c" {
@@ -140,15 +146,16 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 
 					txid, err := starkex.Deposit(l2DepositRequest)
 					if err != nil {
+						logger.Error(err, "deposit failed")
 						return err
 					}
-					fmt.Println("txid:", txid)
+					logger.Info("send to starkex txid:", txid)
 					latestEvent = currenEventLog
 				}
 			}
 			parsedBlock = endBlockNumber
 		case <-infoTicker:
-			fmt.Println("eventName:", eventName, "currentBlockNumber:", currentBlockNumber, "parsed block", parsedBlock)
+			logger.Info("eventName:", eventName, "currentBlockNumber:", currentBlockNumber, "parsed block", parsedBlock)
 		}
 	}
 }
