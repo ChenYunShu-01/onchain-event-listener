@@ -54,7 +54,6 @@ func NewExecutor(cfg *config.Cfg) (*Executor, error) {
 
 	err = executor.db.InitL1AdapterTable()
 
-	
 	return executor, err
 }
 
@@ -142,7 +141,7 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 						logger.Error(err, "compute l2 deposit request failed")
 						return err
 					}
-					if l2DepositRequest.StarkKey != "0x38cae143fe6d2b8bdb7051f211744017d98f7e6a67e45a5dfc08759c119cf3c" and l2DepositRequest.StarkKey != "0x7d459f9c3ff9fda3073a4f793f809e1edcb6e4ef27a9a385f7e2b414d5d8e41" {
+					if l2DepositRequest.StarkKey != "0x38cae143fe6d2b8bdb7051f211744017d98f7e6a67e45a5dfc08759c119cf3c" && l2DepositRequest.StarkKey != "0x7d459f9c3ff9fda3073a4f793f809e1edcb6e4ef27a9a385f7e2b414d5d8e41" {
 						continue
 					}
 
