@@ -150,7 +150,7 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 						logger.Error(err, "deposit failed")
 						return err
 					}
-					logger.Info("send to starkex", "txid:", fmt.Sprint(txid))
+					logger.Info("send to starkex", "txid:", fmt.Sprint(txid), "origin hash:", log.TxHash.Hex())
 					latestEvent = currenEventLog
 				}
 			}
