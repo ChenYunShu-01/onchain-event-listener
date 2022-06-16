@@ -158,6 +158,7 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 						}
 					}
 					if err != nil {
+						logger.Error(err, "deposit failed")
 						return err
 					}
 
