@@ -145,11 +145,23 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 						continue
 					}
 
-					txid, err := starkex.Deposit(l2DepositRequest)
+					var txid int64
+
+					for i := 0; i < 5; i++ {
+						txid, err = starkex.Deposit(l2DepositRequest)
+						if err == nil {
+							break
+						}
+
+						if err != nil {
+							logger.Error(err, "deposit failed, retrying")
+						}
+					}
 					if err != nil {
 						logger.Error(err, "deposit failed")
 						return err
 					}
+
 					logger.Info("send to starkex", "txid:", fmt.Sprint(txid), "origin hash:", log.TxHash.Hex())
 					latestEvent = currenEventLog
 				}
