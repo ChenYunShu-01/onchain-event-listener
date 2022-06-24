@@ -11,7 +11,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/reddio-com/red-adapter/config"
-	"github.com/reddio-com/red-adapter/pkg/starkex"
 	"github.com/reddio-com/starkex-contracts-source/source/deposits"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -134,8 +133,6 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 					return err
 				}
 				if currenEventLog.NewerThan(latestEvent) {
-					fmt.Println("event Name", eventName)
-					db.Create(&currenEventLog)
 					l2DepositRequest, err := computeL2DepositRequest(log, eventName)
 					if err != nil {
 						logger.Error(err, "compute l2 deposit request failed")
@@ -145,24 +142,9 @@ func watchEvent(contractName contracts.ContractName, eventName types.EventName, 
 						continue
 					}
 
-					var txid int64
+					fmt.Println("event Name", eventName)
+					db.Create(&currenEventLog)
 
-					for i := 0; i < 5; i++ {
-						txid, err = starkex.Deposit(l2DepositRequest)
-						if err == nil {
-							break
-						}
-
-						if err != nil {
-							logger.Error(err, "deposit failed, retrying")
-						}
-					}
-					if err != nil {
-						logger.Error(err, "deposit failed")
-						return err
-					}
-
-					logger.Info("send to starkex", "txid:", fmt.Sprint(txid), "origin hash:", log.TxHash.Hex())
 					latestEvent = currenEventLog
 				}
 			}
