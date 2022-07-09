@@ -4,8 +4,8 @@ services:
     image: ubuntu/mysql:8.0-20.04_beta
     restart: always
     environment:
-      MYSQL_DATABASE: 'reddifi'
-      MYSQL_ROOT_PASSWORD: 'password'
+      MYSQL_DATABASE: 'sample'
+      MYSQL_ROOT_PASSWORD: '*******'
     ports:
       - "127.0.0.1:3306:3306"
     volumes:

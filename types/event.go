@@ -27,13 +27,13 @@ func (event *EventLog) IsNil() bool {
 func (event *EventLog) NewerThan(log *EventLog) bool {
 	if event.BlockNumber > log.BlockNumber {
 		return true
-	} else if event.BlockNumber == log.BlockNumber {
+	}
+	if event.BlockNumber == log.BlockNumber {
 		if event.LogIndex > log.LogIndex {
 			return true
-		} else {
-			return false
 		}
-	} else {
 		return false
 	}
+	return false
+
 }
